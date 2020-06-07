@@ -1,0 +1,8 @@
+Django
+Pillow
+gunicorn
+whitenoise
+
+django-heroku
+dj-database-url
+django-phone-field

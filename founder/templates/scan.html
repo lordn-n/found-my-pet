@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+        <title>Pet Founder :: {{ pet.name }}</title>
+    </head>
+    <body>
+        <div class="jumbotron">
+            <h1 class="display-4">Encontraste a {{ pet.name }}!</h1>
+            {% if pet.lost %}
+                <p class="lead">
+                    {{ pet.owner.name }} ha estado buscando a {{ pet.name }} desde {{ pet.lost_date }}!
+                    <br/>
+                    {{ pet.notes }}
+                </p>
+            {% endif %}
+
+            <hr class="my-4">
+
+            <h2>Información de la mascota</h2>
+            <div class="container">
+                <div class="row justify-content-start">
+                    <div class="col-4">
+                        Nombre
+                    </div>
+                    <div class="col-4">
+                        {{ pet.name }}
+                    </div>
+                </div>
+                <div class="row justify-content-start">
+                    <div class="col-4">
+                        Especie
+                    </div>
+                    <div class="col-4">
+                        {{ pet.species }}
+                    </div>
+                </div>
+                <div class="row justify-content-start">
+                    <div class="col-4">
+                        Raza
+                    </div>
+                    <div class="col-4">
+                        {{ pet.breed }}
+                    </div>
+                </div>
+                <div class="row justify-content-start">
+                    <div class="col-4">
+                        Color
+                    </div>
+                    <div class="col-4">
+                        {{ pet.color }}
+                    </div>
+                </div>
+                <div class="row justify-content-start">
+                    <div class="col">
+                        <img src="{{ pet.photo.url }}" height="300" width="300">
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4">
+
+            <h2>Información del dueño</h2>
+            <div class="container">
+                <div class="row justify-content-start">
+                    <div class="col-4">
+                        Nombre
+                    </div>
+                    <div class="col-4">
+                        {{ pet.owner.name }} {{ pet.owner.last_names }}
+                    </div>
+                </div>
+                <div class="row justify-content-start">
+                    <div class="col-4">
+                        Telefono
+                    </div>
+                    <div class="col-4">
+                        {{ pet.owner.phone }}
+                    </div>
+                </div>
+            </div>
+
+            {% if pet.lost %}
+                <hr class="my-4">
+
+                <form action="report" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="pet" value="{{ pet.id }}" />
+                    <p>
+                        Ahora puedes notificar a {{ pet.owner.name }} de que encontraste su {{ pet.species|lower }}<br>
+                        nombre <input type="text" name="name">
+                        Puedes enviarle tu ubicacion <input type="text" name="location"> <button id="add_location">Agregar ubicacion</button>
+                        <p id="status"></p>
+                        <input id="searchTextField" type="text" size="50">
+                        <br>
+                        o mandarle cualquier mensaje, como tu numero de telefono u otro medio para contactarte<br>
+                        <textarea name="information"></textarea>
+                    </p>
+                    <button class="btn btn-primary btn-lg" href="#" role="button">Notificar a {{ pet.owner.name }}</button>
+                </form>
+            {% endif %}
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+        <script type="text/javascript">
+            function geoFindMe(event) {
+                const status = document.querySelector('#status');
+                const location_input = document.querySelector('[name="location"]');
+
+                location_input.value = '';
+
+                function success(position) {
+                    console.log(position);
+
+                    const latitude  = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+
+                    status.textContent = '';
+                    location_input.value = `https://www.openstreetmap.org/#map=18/${latitude}/${longitude}`;
+                }
+
+                function error() {
+                    status.textContent = 'No se pudo obtener la ubicación';
+                }
+
+                if (!navigator.geolocation) {
+                    status.textContent = 'Ubicación no soportada en tu dispositivo :(';
+                } else {
+                    status.textContent = 'Obteniendo ubicación...';
+                    navigator.geolocation.getCurrentPosition(success, error);
+                }
+
+                event.preventDefault();
+                return false;
+            }
+
+            document.querySelector('#add_location').addEventListener('click', geoFindMe);
+
+            function initialize() {
+                var input = document.getElementById('searchTextField');
+                new google.maps.places.Autocomplete(input);
+            }
+        </script>
+
+        <script src="https://maps.googleapis.com/maps/api/js?key={{ maps_key }}&libraries=places&callback=initialize"></script>
+    </body>
+</html>
